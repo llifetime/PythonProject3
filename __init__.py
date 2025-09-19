@@ -16,10 +16,10 @@ class Product:
             price (float): Product price
             quantity (int): Quantity in stock
         """
-        self.name = name
-        self.description = description
-        self.price = price
-        self.quantity = quantity
+        self.name: str = name
+        self.description: str = description
+        self.price: float = price
+        self.quantity: int = quantity
 
     def __str__(self) -> str:
         """Return string representation of product."""
@@ -42,9 +42,9 @@ class Category:
             description (str): Category description
             products (list, optional): List of products. Defaults to None.
         """
-        self.name = name
-        self.description = description
-        self.products = products if products is not None else []
+        self.name: str = name
+        self.description: str = description
+        self.products: List[Product] = products if products is not None else []
 
         # Update class counters
         Category.total_categories += 1

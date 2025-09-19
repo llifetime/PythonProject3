@@ -28,7 +28,7 @@ def main():
     # Display product information
     print("=== ИНФОРМАЦИЯ О ТОВАРАХ ===")
     for i, product in enumerate([product1, product2, product3], 1):
-        print(f"\nТовар {i}:")
+        print(f"\nТовар {i}: ")
         print(f"Название: {product.name}")
         print(f"Описание: {product.description}")
         print(f"Цена: {product.price}")
@@ -52,7 +52,7 @@ def main():
     # Display products in category
     print("\nТовары в категории:")
     for product in category1.products:
-        print(f"  - {product.name}: {product.price} руб. (остаток: {product.quantity})")
+        print(f"-{product.name}: {product.price} руб. (остаток: {product.quantity})")
 
     # Create another category
     product4 = Product("55\" QLED 4K", "Фоновая подсветка", 123000.0, 7)
