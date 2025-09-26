@@ -1,5 +1,4 @@
 """Module for Product and Category classes."""
-
 from typing import List, Optional
 
 
@@ -20,6 +19,44 @@ class Product:
         self.description: str = description
         self.price: float = price
         self.quantity: int = quantity
+
+    @classmethod
+    def new_product(cls, product_data):
+        """Улучшенная версия с проверками"""
+        try:
+            # Проверяем, что все необходимые поля есть
+            required_fields = ['name', 'price', 'quantity']
+            for field in required_fields:
+                if field not in product_data:
+                    raise ValueError(f"Отсутствует поле: {field}")
+
+            # Создаем товар
+            return cls(
+                name=product_data['name'],
+                price=product_data['price'],
+                quantity=product_data['quantity']
+            )
+
+        except Exception as e:
+            print(f"Ошибка создания товара: {e}")
+            return None
+            # Геттер для цены (позволяет читать цену)
+
+        @property
+        def price(self):
+            """Возвращает текущую цену товара"""
+            return self.__price
+
+        # Сеттер для цены (позволяет изменять цену с проверкой)
+        @price.setter
+        def price(self, new_price):
+            """Устанавливает новую цену с проверкой"""
+            if new_price <= 0:
+                print("Цена не должна быть нулевая или отрицательная")
+                # НЕ устанавливаем новую цену, оставляем старую
+            else:
+                self.__price = new_price
+                print(f"Цена товара '{self.name}' изменена на {new_price} руб.")
 
     def __str__(self) -> str:
         """Return string representation of product."""
@@ -44,16 +81,30 @@ class Category:
         """
         self.name: str = name
         self.description: str = description
-        self.products: List[Product] = products if products is not None else []
+        self.__products: List[Product] = products if products is not None else []
 
         # Update class counters
         Category.total_categories += 1
-        Category.total_unique_products += len(self.products)
+        Category.total_unique_products += len(self.__products)
 
     def add_product(self, product: Product) -> None:
         """Add product to category."""
-        self.products.append(product)
+        self.__products.append(product)
         Category.total_unique_products += 1
+
+    @property
+    def products(self):
+        """Геттер для просмотра товаров в нужном формате"""
+        if not self.__products:
+            return "В категории нет товаров"
+
+        result = []
+        for product in self.__products:
+            # Форматируем по шаблону: "Название, цена руб. Остаток: кол-во шт."
+            product_info = f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
+            result.append(product_info)
+
+        return "\n".join(result)  # объединяем все строки через перенос
 
     def remove_product(self, product_name: str) -> None:
         """Remove product from category by name."""
