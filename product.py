@@ -26,12 +26,24 @@ class Product:
         """Строковое представление товара"""
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
+    def __add__(self, other):
+        """
+        Реализация сложения продуктов.
+        Возвращает общую стоимость всех товаров на складе.
+        Логика: (цена1 × количество1) + (цена2 × количество2)
+        """
+        if not isinstance(other, Product):
+            raise TypeError("Можно складывать только объекты класса Product")
+
+        return self.price * self.quantity + other.price * other.quantity
+
 
 class Category:
     def __init__(self, name):
         """
         Конструктор класса Category
         """
+        self.products_list = None
         self.name = name
         self.__products = []  # ПРИВАТНЫЙ список товаров
     
@@ -64,8 +76,27 @@ class Category:
             product_info = f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
             result.append(product_info)
         
-        return "\n".join(result)
+        return "\n".join(str(product) for product in self.products)
     
     def __str__(self):
-        """Строковое представление категории"""
-        return f"Категория: {self.name}\nТовары:\n{self.products}"
+        """
+        Строковое представление категории в формате:
+        "Название категории, количество продуктов: 200 шт."
+        """
+        total_products = len(self.products)
+        return f"{self.name}, количество продуктов: {total_products} шт."
+
+    def total_value(self):
+        """
+        Дополнительный метод для расчета общей стоимости всех товаров в категории.
+        """
+        return sum(product.price * product.quantity for product in self.products)
+
+def sum_products(*products):
+    """Складывает стоимость нескольких продуктов"""
+    total = 0
+    for product in products:
+        if not isinstance(product, Product):
+            raise TypeError("Все аргументы должны быть объектами Product")
+        total += product.price * product.quantity
+    return total
