@@ -7,6 +7,12 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.13"
+pytest = "^8.4.2"
+txt = "^2020.11.12"
+flake8 = "==7.3.0"
+coverage = "==7.10.7"
+pytest-cov = "==7.0.0"
+poetry-core = "^2.2.1"
 
 
 [build-system]
