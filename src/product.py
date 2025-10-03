@@ -25,22 +25,24 @@ class Product:
 
     def __str__(self):
         """Строковое представление товара"""
-        return f"{self.name} ({self.description}), {self.price} руб. Остаток: {self.quantity} шт."
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other):
+        """Сложение двух продуктов возвращает общую стоимость"""
         if isinstance(other, Product):
-            # Product + Product = сумма стоимостей
-            return self.price * self.quantity + other.price * other.quantity
+            # Product + Product = сумма стоимостей обоих продуктов
+            return (self.price * self.quantity) + (other.price * other.quantity)
         elif isinstance(other, (int, float)):
             # Product + число = стоимость продукта + число
-            return self.price * self.quantity + other
+            return (self.price * self.quantity) + other
         else:
             raise TypeError("Можно складывать только с Product или числами")
 
     def __radd__(self, other):
-        # число + Product = число + стоимость продукта
+        """Правое сложение - число + Product"""
         if isinstance(other, (int, float)):
-            return other + self.price * self.quantity
+            # число + Product = число + стоимость продукта
+            return other + (self.price * self.quantity)
         else:
             raise TypeError("Можно складывать только с числами")
 
