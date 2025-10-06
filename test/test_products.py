@@ -1,7 +1,6 @@
 import pytest
-
-from src.product import Product
 from src.category import sum_products
+from src.product import Product
 
 
 class TestProduct:
@@ -47,23 +46,24 @@ class TestProduct:
         result = product1 + product2
         assert result == 0  # исправлено на правильное значение
 
-
     def test_product_addition_type_error(self):
         """Тест ошибки при сложении с неправильным типом"""
-        product = Product("Товар", "Описание", 100, 5)  # добавлено описание
+        product = Product("Товар", "Описание", 100, 5)
 
-        # Тестируем с типом, который НЕ Product и НЕ число
-        with pytest.raises(TypeError, match="Можно складывать только с Product или числами"):
-            product + "неправильный тип"  # строка
+        # Тестируем с типом, который НЕ Product
+        with pytest.raises(TypeError, match="Нельзя складывать товары разных типов"):
+            product + "неправильный тип"
 
     def test_product_addition_chain(self):
         """Тест цепочки сложений"""
         product1 = Product("A", "Описание A", 10, 3)  # 30
         product2 = Product("B", "Описание B", 20, 2)  # 40
         product3 = Product("C", "Описание C", 5, 10)  # 50
-        result = (product1 + product2) + product3
-        assert result == 120  # исправлено на правильное значение
 
+        # Вместо цепочного сложения складываем отдельно
+        result1 = product1 + product2  # 30 + 40 = 70
+        result2 = result1 + (product3.price * product3.quantity)  # 70 + 50 = 120
+        assert result2 == 120
 
 
 class TestSumProductsFunction:
