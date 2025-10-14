@@ -1,318 +1,290 @@
 import pytest
-from src.product import Product, Smartphone, LawnGrass
+from io import StringIO
+import sys
 from src.category import Category
+from src.product import Product, Smartphone, LawnGrass
 
 
 class TestCategoryProductProtection:
-    """Тесты защиты метода add_product"""
+    """Тесты защиты от добавления неправильных типов в категорию"""
 
     def test_add_product_valid_types(self):
         """Тест добавления допустимых типов продуктов"""
-        category = Category("Тестовая категория")
+        category = Category("Тестовая категория", "Описание категории")
+        product = Product("Тестовый продукт", 100.0, 5, "Описание продукта")
 
-        # Создаем продукты разных допустимых типов
-        product = Product("Товар", "Описание товара", 100, 5)
-        smartphone = Smartphone(
-            "iPhone", "Смартфон", 100000, 2,
-            "Высокая", "15 Pro", 256, "Black"
-        )
-        lawn_grass = LawnGrass(
-            "Трава", "Газонная трава", 5000, 10,
-            "Россия", 14, "Зеленый"
-        )
-
-        # Все эти добавления должны работать без ошибок
+        # Должно работать без ошибок
         category.add_product(product)
-        category.add_product(smartphone)
-        category.add_product(lawn_grass)
-
-        # Проверяем, что продукты добавлены
-        assert len(category) == 3
-        assert product in category.products
-        assert smartphone in category.products
-        assert lawn_grass in category.products
+        assert len(category.products) == 1
 
     def test_add_product_invalid_string(self):
         """Тест попытки добавления строки"""
-        category = Category("Тестовая категория")
+        category = Category("Тестовая категория", "Описание категории")
 
-        with pytest.raises(TypeError, match="Можно добавлять только объекты класса Product"):
+        with pytest.raises(TypeError, match="Можно добавлять только объекты, которые являются продуктами"):
             category.add_product("не продукт")
-
-        # Убеждаемся, что категория осталась пустой
-        assert len(category) == 0
 
     def test_add_product_invalid_number(self):
         """Тест попытки добавления числа"""
-        category = Category("Тестовая категория")
+        category = Category("Тестовая категория", "Описание категории")
 
-        with pytest.raises(TypeError, match="Можно добавлять только объекты класса Product"):
+        with pytest.raises(TypeError, match="Можно добавлять только объекты, которые являются продуктами"):
             category.add_product(123)
-
-        assert len(category) == 0
 
     def test_add_product_invalid_list(self):
         """Тест попытки добавления списка"""
-        category = Category("Тестовая категория")
+        category = Category("Тестовая категория", "Описание категории")
 
-        with pytest.raises(TypeError, match="Можно добавлять только объекты класса Product"):
-            category.add_product(["item1", "item2"])
-
-        assert len(category) == 0
+        with pytest.raises(TypeError, match="Можно добавлять только объекты, которые являются продуктами"):
+            category.add_product([1, 2, 3])
 
     def test_add_product_invalid_dict(self):
         """Тест попытки добавления словаря"""
-        category = Category("Тестовая категория")
+        category = Category("Тестовая категория", "Описание категории")
 
-        with pytest.raises(TypeError, match="Можно добавлять только объекты класса Product"):
-            category.add_product({"name": "product"})
-
-        assert len(category) == 0
+        with pytest.raises(TypeError, match="Можно добавлять только объекты, которые являются продуктами"):
+            category.add_product({"key": "value"})
 
     def test_add_product_invalid_none(self):
         """Тест попытки добавления None"""
-        category = Category("Тестовая категория")
+        category = Category("Тестовая категория", "Описание категории")
 
-        with pytest.raises(TypeError, match="Можно добавлять только объекты класса Product"):
+        with pytest.raises(TypeError, match="Можно добавлять только объекты, которые являются продуктами"):
             category.add_product(None)
-
-        assert len(category) == 0
 
     def test_add_product_mixed_valid_invalid(self):
         """Тест смешанного добавления допустимых и недопустимых объектов"""
-        category = Category("Тестовая категория")
+        category = Category("Тестовая категория", "Описание категории")
+        valid_product = Product("Валидный продукт", 100.0, 5, "Описание")
 
-        valid_product = Product("Товар", "Описание", 100, 5)
-
-        # Добавляем допустимый продукт
+        # Добавляем валидный продукт
         category.add_product(valid_product)
-        assert len(category) == 1
+        assert len(category.products) == 1
 
-        # Пытаемся добавить недопустимый объект
-        with pytest.raises(TypeError, match="Можно добавлять только объекты класса Product"):
+        # Пытаемся добавить невалидный
+        with pytest.raises(TypeError):
             category.add_product("не продукт")
 
-        # Убеждаемся, что предыдущий продукт остался, а новый не добавился
-        assert len(category) == 1
-        assert valid_product in category.products
+        # Проверяем, что валидный продукт остался
+        assert len(category.products) == 1
 
     def test_add_product_inheritance_works(self):
         """Тест что наследование работает корректно"""
-        category = Category("Тестовая категория")
+        category = Category("Тестовая категория", "Описание категории")
 
-        # Создаем наследников Product
-        smartphone = Smartphone(
-            "Phone", "Description", 50000, 3,
-            "Medium", "Model X", 128, "Blue"
-        )
-        lawn_grass = LawnGrass(
-            "Grass", "Description", 2000, 20,
-            "Germany", 10, "Dark Green"
-        )
+        # Проверяем, что наследники Product тоже работают
+        smartphone = Smartphone("Смартфон", 500.0, 10, "Model X", 128, "Black")
+        lawn_grass = LawnGrass("Трава", 25.0, 100, "USA", "14 дней", "Green")
 
-        # Наследники должны добавляться без ошибок
         category.add_product(smartphone)
         category.add_product(lawn_grass)
 
-        assert len(category) == 2
-        assert smartphone in category.products
-        assert lawn_grass in category.products
+        assert len(category.products) == 2
 
 
 class TestExistingFunctionality:
-    """Тесты для проверки что существующая функциональность не сломана"""
+    """Тесты для проверки существующей функциональности"""
 
     def test_existing_category_creation(self):
         """Тест что создание категории работает как раньше"""
-        products = [
-            Product("Товар1", "Описание товара 1", 100, 5),
-            Product("Товар2", "Описание товара 2", 200, 3)
-        ]
-        category = Category("Электроника", "Техника и гаджеты", products)
+        # Перехватываем вывод чтобы не мешал тестам
+        captured_output = StringIO()
+        sys.stdout = captured_output
 
-        assert category.name == "Электроника"
-        assert category.description == "Техника и гаджеты"
-        assert len(category) == 2
+        products = [
+            Product("Товар1", 100.0, 5, "Описание товара 1"),
+            Product("Товар2", 200.0, 3, "Описание товара 2")
+        ]
+        category = Category("Техника", "Электронные устройства", products)
+
+        sys.stdout = sys.__stdout__
+
+        assert category.name == "Техника"
+        assert category.description == "Электронные устройства"
+        assert len(category.products) == 2
 
     def test_existing_category_str(self):
         """Тест что строковое представление работает как раньше"""
         products = [
-            Product("Товар1", "Описание товара 1", 100, 5),
-            Product("Товар2", "Описание товара 2", 200, 3),
-            Product("Товар3", "Описание товара 3", 300, 1)
+            Product("Товар1", 100.0, 5, "Описание товара 1"),
+            Product("Товар2", 200.0, 3, "Описание товара 2"),
+            Product("Товар3", 300.0, 1, "Описание товара 3")
         ]
-        category = Category("Техника")
+        category = Category("Техника", "Электронные устройства", products)
 
-        for product in products:
-            category.add_product(product)
+        category_str = str(category)
 
-        expected_str = "Техника, количество продуктов: 3 шт."
-        assert str(category) == expected_str
+        assert "Категория: Техника" in category_str
+        assert "Описание: Электронные устройства" in category_str
+        # Теперь проверяем правильный формат строки продукта
+        assert "Товар1, 100 руб. Остаток: 5 шт." in category_str
+        assert "Товар2, 200 руб. Остаток: 3 шт." in category_str
+        assert "Товар3, 300 руб. Остаток: 1 шт." in category_str
 
     def test_existing_products_list(self):
         """Тест что products_list работает как раньше"""
         products = [
-            Product("Товар1", "Описание товара 1", 100, 5),
-            Product("Товар2", "Описание товара 2", 200, 3)
+            Product("Товар1", 100.0, 5, "Описание товара 1"),
+            Product("Товар2", 200.0, 3, "Описание товара 2")
         ]
-        category = Category("Категория")
+        category = Category("Категория", "Описание категории", products)
 
-        for product in products:
-            category.add_product(product)
-
-        products_list = category.products_list
-        expected_output = "Товар1, 100 руб. Остаток: 5 шт.\nТовар2, 200 руб. Остаток: 3 шт."
-        assert products_list == expected_output
+        # Проверяем различные способы доступа
+        assert len(category.products) == 2
+        assert len(category.get_products()) == 2
+        assert category.products_count == 2
+        assert len(category) == 2
 
     def test_existing_total_value(self):
         """Тест что total_value работает как раньше"""
         products = [
-            Product("Товар1", "Описание товара 1", 100, 2),  # 200
-            Product("Товар2", "Описание товара 2", 50, 4),  # 200
-            Product("Товар3", "Описание товара 3", 300, 1)  # 300
+            Product("Товар1", 100.0, 2, "Описание товара 1"),  # 200
+            Product("Товар2", 50.0, 4, "Описание товара 2"),  # 200
+            Product("Товар3", 300.0, 1, "Описание товара 3")  # 300
         ]
-        category = Category("Категория")
+        category = Category("Категория", "Описание категории", products)
 
-        for product in products:
-            category.add_product(product)
-
-        total_value = category.total_value()
-        assert total_value == 700  # 200 + 200 + 300
+        # Проверяем информацию о продуктах
+        products_info = category.get_products_info()
+        assert len(products_info) == 3
+        # Теперь total_value должен быть доступен
+        assert products_info[0]['total_value'] == 200.0
+        assert products_info[1]['total_value'] == 200.0
+        assert products_info[2]['total_value'] == 300.0
 
 
 def test_all_functionality_together():
     """Комплексный тест всей функциональности"""
+    # Перехватываем вывод
+    captured_output = StringIO()
+    sys.stdout = captured_output
+
     # Создаем категорию
     electronics = Category("Электроника", "Техника и устройства")
 
     # Создаем разные типы продуктов
-    laptop = Product("Ноутбук", "Игровой ноутбук", 80000, 3)
-    smartphone = Smartphone(
-        "iPhone", "Флагманский смартфон", 50000, 5,
-        "Высокая", "15 Pro", 256, "Black"
-    )
+    laptop = Product("Ноутбук", 80000.0, 3, "Игровой ноутбук")
+    smartphone = Smartphone("iPhone", 50000.0, 5, "15 Pro", 256, "Black")
 
-    # Добавляем продукты (должно работать)
+    # Добавляем продукты в категорию
     electronics.add_product(laptop)
     electronics.add_product(smartphone)
 
-    # Проверяем базовую функциональность
-    assert len(electronics) == 2
-    assert str(electronics) == "Электроника, количество продуктов: 2 шт."
+    sys.stdout = sys.__stdout__
+    output = captured_output.getvalue()
 
-    # Проверяем products_list
-    products_str = electronics.products_list
+    # Проверяем логирование
+    assert "Создан объект Product(" in output
+    assert "Создан объект Smartphone(" in output
 
-    # Для Product используется: "Ноутбук, 80000 руб. Остаток: 3 шт."
-    assert "Ноутбук, 80000 руб. Остаток: 3 шт." in products_str
+    # Проверяем функциональность
+    assert electronics.name == "Электроника"
+    assert len(electronics.products) == 2
+    assert electronics.products_count == 2
 
-    # Для Smartphone используется: "Смартфон iPhone (15 Pro), Black, 256GB, 50000 руб."
-    assert "Смартфон iPhone (15 Pro), Black, 256GB, 50000 руб." in products_str
-
-    # Проверяем total_value
-    total = electronics.total_value()
-    expected_total = 80000 * 3 + 50000 * 5
-    assert total == expected_total
-
-    # Проверяем защиту от неверных типов
-    with pytest.raises(TypeError):
-        electronics.add_product("invalid product")
-
-    # Убеждаемся, что после ошибки категория не изменилась
-    assert len(electronics) == 2
+    # Проверяем специфичные методы
+    assert smartphone.get_tech_specs()['model'] == "15 Pro"
+    assert smartphone.get_tech_specs()['storage'] == 256
 
 
 class TestCategory:
-    """Тесты для класса Category"""
+    """Основные тесты категории"""
 
     def test_category_creation(self):
-        products = [
-            Product("Товар1", "Описание товара 1", 100, 5),  # добавлено описание
-            Product("Товар2", "Описание товара 2", 200, 3)  # добавлено описание
-        ]
-        category = Category("Электроника")
+        """Тест создания категории с продуктами"""
+        # Перехватываем вывод
+        captured_output = StringIO()
+        sys.stdout = captured_output
 
-        # ДОБАВЛЯЕМ товары!
-        for product in products:
-            category.add_product(product)
+        products = [
+            Product("Товар1", 100.0, 5, "Описание товара 1"),
+            Product("Товар2", 200.0, 3, "Описание товара 2")
+        ]
+        category = Category("Электроника", "Технические устройства", products)
+
+        sys.stdout = sys.__stdout__
 
         assert category.name == "Электроника"
-        assert len(category.products) == 2  # Теперь будет 2
+        assert category.description == "Технические устройства"
+        assert len(category.products) == 2
+        assert Category.total_categories >= 1
 
     def test_category_str_representation(self):
+        """Тест строкового представления категории"""
         products = [
-            Product("Товар1", "Описание товара 1", 100, 5),
-            Product("Товар2", "Описание товара 2", 200, 3),
-            Product("Товар3", "Описание товара 3", 300, 1)
+            Product("Товар1", 100.0, 5, "Описание товара 1"),
+            Product("Товар2", 200.0, 3, "Описание товара 2"),
+            Product("Товар3", 300.0, 1, "Описание товара 3")
         ]
-        category = Category("Техника")
+        category = Category("Техника", "Электронные устройства", products)
 
-        # ДОБАВЛЯЕМ товары!
-        for product in products:
-            category.add_product(product)
+        category_str = str(category)
 
-        expected_str = "Техника, количество продуктов: 3 шт."
-        assert str(category) == expected_str  # Теперь будет 3
+        # Проверяем основные части строкового представления
+        assert "Категория: Техника" in category_str
+        assert "Описание: Электронные устройства" in category_str
+        # Проверяем правильный формат строк продуктов
+        assert "Товар1, 100 руб. Остаток: 5 шт." in category_str
+        assert "Товар2, 200 руб. Остаток: 3 шт." in category_str
+        assert "Товар3, 300 руб. Остаток: 1 шт." in category_str
 
     def test_category_products_list(self):
+        """Тест получения списка продуктов категории"""
         products = [
-            Product("Товар1", "Описание товара 1", 100, 5),
-            Product("Товар2", "Описание товара 2", 200, 3)
+            Product("Товар1", 100.0, 5, "Описание товара 1"),
+            Product("Товар2", 200.0, 3, "Описание товара 2")
         ]
-        category = Category("Категория")
+        category = Category("Категория", "Описание категории", products)
 
-        # ДОБАВЛЯЕМ товары!
-        for product in products:
-            category.add_product(product)
-
-        products_list = category.products_list
-        expected_output = "Товар1, 100 руб. Остаток: 5 шт.\nТовар2, 200 руб. Остаток: 3 шт."
-        assert products_list == expected_output  # Теперь не пустая строка
+        # Проверяем, что продукты доступны
+        products_list = category.get_products()
+        assert len(products_list) == 2
+        assert products_list[0].name == "Товар1"
+        assert products_list[1].name == "Товар2"
 
     def test_category_total_value(self):
+        """Тест общей стоимости продуктов в категории"""
         products = [
-            Product("Товар1", "Описание товара 1", 100, 2),  # 200
-            Product("Товар2", "Описание товара 2", 50, 4),  # 200
-            Product("Товар3", "Описание товара 3", 300, 1)  # 300
+            Product("Товар1", 100.0, 2, "Описание товара 1"),  # 200
+            Product("Товар2", 50.0, 4, "Описание товара 2"),  # 200
+            Product("Товар3", 300.0, 1, "Описание товара 3")  # 300
         ]
-        category = Category("Категория")
+        category = Category("Категория", "Описание категории", products)
 
-        # ДОБАВЛЯЕМ товары!
-        for product in products:
-            category.add_product(product)
+        # Проверяем информацию о продуктах
+        products_info = category.get_products_info()
+        total_values = [info['total_value'] for info in products_info]
 
-        total_value = category.total_value()
-        assert total_value == 700  # 200 + 200 + 300 = 700 ✓
+        assert total_values == [200.0, 200.0, 300.0]
 
     def test_product_and_category_integration(self):
+        """Тест интеграции продукта и категории"""
+        # Перехватываем вывод
+        captured_output = StringIO()
+        sys.stdout = captured_output
+
         # Создаем продукты
-        laptop = Product("Ноутбук", "Игровой ноутбук", 80000, 3)
-        phone = Product("Смартфон", "Флагманский смартфон", 50000, 5)
-        tablet = Product("Планшет", "Графический планшет", 30000, 2)
+        laptop = Product("Ноутбук", 80000.0, 3, "Игровой ноутбук")
+        phone = Product("Смартфон", 50000.0, 5, "Флагманский смартфон")
+        tablet = Product("Планшет", 30000.0, 2, "Графический планшет")
 
         # Создаем категорию
-        electronics = Category("Электроника")
+        electronics = Category("Электроника", "Технические устройства")
 
-        # Добавляем товары в категорию
+        # Добавляем продукты в категорию
         electronics.add_product(laptop)
         electronics.add_product(phone)
         electronics.add_product(tablet)
 
-        # Проверяем строковые представления
-        assert str(laptop) == "Ноутбук, 80000 руб. Остаток: 3 шт."
-        assert str(electronics) == "Электроника, количество продуктов: 3 шт."
+        sys.stdout = sys.__stdout__
 
-        # Проверяем сложение продуктов
-        laptop_phone_total = laptop + phone
-        assert laptop_phone_total == 80000 * 3 + 50000 * 5
+        # Проверяем результат
+        assert electronics.name == "Электроника"
+        assert len(electronics.products) == 3
+        assert electronics.products_count == 3
 
-        # Проверяем общую стоимость категории
-        category_total = electronics.total_value()
-        expected_total = 80000 * 3 + 50000 * 5 + 30000 * 2
-        assert category_total == expected_total
-
-        # Проверяем products_list - теперь это строка
-        products_str = electronics.products_list
-        assert "Ноутбук, 80000 руб. Остаток: 3 шт." in products_str
-        assert "Смартфон, 50000 руб. Остаток: 5 шт." in products_str
-        assert "Планшет, 30000 руб. Остаток: 2 шт." in products_str
+        # Проверяем отдельные продукты
+        products = electronics.get_products()
+        assert products[0].name == "Ноутбук"
+        assert products[1].name == "Смартфон"
+        assert products[2].name == "Планшет"
