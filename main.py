@@ -1,75 +1,64 @@
-"""Main module to demonstrate Product and Category functionality."""
+from src.category import Category
+from src.product import LawnGrass, Product
 
-from product import Product, Category
+if __name__ == '__main__':
+    product1 = Product("Samsung Galaxy S23 Ultra", 180000, 5, "256GB, Серый цвет, 200MP камера")
+    product2 = Product("Iphone 15", 210000, 8, "512GB, Gray space")
+    product3 = Product("Xiaomi Redmi Note 11", 31000, 14, "1024GB, Синий")
 
+    print(product1.name)
+    print(product1.description)
+    print(product1.price)
+    print(product1.quantity)
 
-def main():
-    """Demonstrate Product and Category classes functionality."""
-    # Create products
-    product1 = Product(
-        "Samsung Galaxy S23 Ultra",
-        "256GB, Серый цвет, 200MP камера",
-        180000.0,
-        5
-    )
-    product2 = Product(
-        "Iphone 15",
-        "512GB, Gray space",
-        210000.0,
-        8
-    )
-    product3 = Product(
-        "Xiaomi Redmi Note 11",
-        "1024GB, Синий",
-        31000.0,
-        14
-    )
+    print(product2.name)
+    print(product2.description)
+    print(product2.price)
+    print(product2.quantity)
 
-    # Display product information
-    print("=== ИНФОРМАЦИЯ О ТОВАРАХ ===")
-    for i, product in enumerate([product1, product2, product3], 1):
-        print(f"\nТовар {i}: ")
-        print(f"Название: {product.name}")
-        print(f"Описание: {product.description}")
-        print(f"Цена: {product.price}")
-        print(f"Количество: {product.quantity}")
+    print(product3.name)
+    print(product3.description)
+    print(product3.price)
+    print(product3.quantity)
 
-    # Create category with products
-    category1 = Category(
-        "Смартфоны",
-        "Смартфоны, как средство не только коммуникации, "
-        "но и получения дополнительных функций для удобства жизни",
-        [product1, product2, product3]
-    )
+    category1 = Category("Смартфоны",
+                         "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+                         [product1, product2, product3])
 
-    print("\n=== ИНФОРМАЦИЯ О КАТЕГОРИИ ===")
-    print(f"Название категории: {category1.name}")
-    print(f"Описание категории: {category1.description}")
-    print(f"Количество товаров в категории: {len(category1.products)}")
-    print(f"Всего категорий в системе: {Category.total_categories}")
-    print(f"Всего уникальных товаров: {Category.total_unique_products}")
+    print(category1.name == "Смартфоны")
+    print(category1.description)
+    print(len(category1.products))
+    print(category1.category_count)
+    print(category1.products_count)
 
-    # Display products in category
-    print("\nТовары в категории:")
-    for product in category1.products:
-        print(f"-{product.name}: {product.price} руб. (остаток: {product.quantity})")
+    product4 = Product("55\" QLED 4K", 123000, 7, "Фоновая подсветка")
+    category2 = Category("Телевизоры",
+                         "Современный телевизор, который позволяет наслаждаться просмотром, станет вашим другом и помощником",
+                         [product4])
 
-    # Create another category
-    product4 = Product("55\" QLED 4K", "Фоновая подсветка", 123000.0, 7)
-    category2 = Category(
-        "Телевизоры",
-        "Современный телевизор, который позволяет наслаждаться просмотром, "
-        "станет вашим другом и помощником",
-        [product4]
-    )
+    print(category2.name)
+    print(category2.description)
+    print(len(category2.products))
+    print(category2.products)
 
-    print("\n=== ИНФОРМАЦИЯ О КАТЕГОРИИ ===")
-    print(f"Название категории: {category2.name}")
-    print(f"Описание категории: {category2.description}")
-    print(f"Количество товаров в категории: {len(category2.products)}")
-    print(f"Всего категорий в системе: {Category.total_categories}")
-    print(f"Всего уникальных товаров: {Category.total_unique_products}")
+    print(Category.category_count)
+    print(Category.products_count)
 
+    grass1 = LawnGrass("Элитная трава для газона", 500, 20, "Россия", "7 дней", "Зеленый")
+    grass2 = LawnGrass("Выносливая трава", 450.0, 15, "США", "5 дней", "Темно-зеленый")
 
-if __name__ == "__main__":
-    main()
+    print(grass1.name)
+    print(grass1.description)
+    print(grass1.price)
+    print(grass1.quantity)
+    print(grass1.country)
+    print(grass1.germination_period)
+    print(grass1.color)
+
+    print(grass2.name)
+    print(grass2.description)
+    print(grass2.price)
+    print(grass2.quantity)
+    print(grass2.country)
+    print(grass2.germination_period)
+    print(grass2.color)
