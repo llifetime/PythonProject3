@@ -30,18 +30,34 @@ class Category:
         Добавляет продукт в категорию
 
         Args:
-            product: Продукт для добавления (объект класса Product или его наследников)
+            product: Продукт для добавления
+
+        Raises:
+            ValueError: Если количество товара равно 0
         """
-        # Проверяем, что продукт имеет необходимые атрибуты вместо проверки типа
-        if (hasattr(product, "name")
-                and hasattr(product, 'price')
-                and hasattr(product, 'quantity')
-                and hasattr(product, 'get_description')):
-            self.__products.append(product)
-            # Обновляем счетчик уникальных продуктов
-            Category.total_unique_products = len(self.get_products())
-        else:
-            raise TypeError("Можно добавлять только объекты, которые являются продуктами")
+        try:
+            print(f"Попытка добавления товара: {getattr(product, 'name', 'Неизвестный товар')}")
+
+            # Проверяем, что продукт имеет необходимые атрибуты
+            if (hasattr(product, "name") and hasattr(product, 'price') and
+                    hasattr(product, 'quantity') and hasattr(product, 'get_description')):
+
+                # ПРОВЕРКА НА НУЛЕВОЕ КОЛИЧЕСТВО - ДОБАВЬТЕ ЭТО
+                if product.quantity == 0:
+                    raise ValueError(f"Товар '{product.name}' не может быть добавлен с нулевым количеством")
+
+                self.__products.append(product)
+                Category.total_unique_products = len(self.get_products())
+                print(f"Товар '{product.name}' успешно добавлен в категорию '{self.name}'")
+
+            else:
+                raise TypeError("Можно добавлять только объекты, которые являются продуктами")
+
+        except (ValueError, TypeError) as e:
+            print(f"Ошибка при добавлении товара: {e}")
+            raise
+        finally:
+            print("Обработка добавления товара завершена\n")
 
     def get_products(self) -> list:
         """
@@ -81,6 +97,23 @@ class Category:
             int: Общее количество категорий
         """
         return Category.total_categories
+
+    def calculate_average_price(self) -> float:
+        """
+        Подсчитывает средний ценник всех товаров в категории.
+        Возвращает 0, если в категории нет товаров.
+        """
+        try:
+            total_price = sum(product.price for product in self.__products)
+            average = total_price / len(self.__products)
+            return average
+        except ZeroDivisionError:
+            return 0
+
+    # Добавьте этот метод как псевдоним
+    def middle_price(self) -> float:
+        """Псевдоним для calculate_average_price"""
+        return self.calculate_average_price()
 
     def get_products_info(self) -> list:
         """
@@ -129,3 +162,4 @@ class Category:
     def __len__(self) -> int:
         """Возвращает количество продуктов в категории"""
         return len(self.__products)
+

@@ -2,6 +2,14 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 
+class ZeroQuantityError(Exception):
+    """Исключение для случая добавления товара с нулевым количеством"""
+
+    def __init__(self, message="Нельзя добавить товар с нулевым количеством"):
+        self.message = message
+        super().__init__(self.message)
+
+
 def _format_arguments(args, kwargs) -> str:
     """Форматирует аргументы для красивого вывода"""
     parts = []
@@ -62,7 +70,14 @@ class BaseProduct(ABC):
             name (str): Название продукта
             price (float): Цена продукта
             quantity (int): Количество продукта
+
+        Raises:
+            ValueError: Если quantity равно 0
         """
+        # Проверка количества при создании товара
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
         self.name = name
         self.price = price
         self.quantity = quantity
@@ -159,6 +174,9 @@ class Product(LoggingMixin, BaseProduct):
             price (float): Цена продукта
             quantity (int): Количество продукта
             description (str): Описание продукта (по умолчанию пустая строка)
+
+        Raises:
+            ValueError: Если quantity равно 0
         """
         # Вызываем __init__ миксина, который залогирует создание и вызовет BaseProduct.__init__
         super().__init__(name, price, quantity)
@@ -211,6 +229,9 @@ class Smartphone(Product):
             model (str): Модель смартфона
             storage (int): Объем памяти в ГБ
             color (str): Цвет
+
+        Raises:
+            ValueError: Если quantity равно 0
         """
         description = f"Смартфон {model}, {storage}ГБ, {color}"
         super().__init__(name, price, quantity, description)
@@ -242,6 +263,9 @@ class LawnGrass(Product):
             country (str): Страна производства
             germination_period (str): Срок прорастания
             color (str): Цвет травы
+
+        Raises:
+            ValueError: Если quantity равно 0
         """
         description = f"Газонная трава из {country}, {color}, прорастание: {germination_period}"
         super().__init__(name, price, quantity, description)
@@ -256,3 +280,187 @@ class LawnGrass(Product):
             'germination_period': self.germination_period,
             'color': self.color
         }
+
+
+class Category:
+    """Класс для категорий продуктов"""
+
+    total_categories = 0
+    total_unique_products = 0
+
+    def __init__(self, name: str, description: str, products: list = None):
+        """
+        Инициализация категории
+
+        Args:
+            name (str): Название категории
+            description (str): Описание категории
+            products (list, optional): Список продуктов для добавления при создании
+        """
+        self.name = name
+        self.description = description
+        self.__products = []
+        Category.total_categories += 1
+
+        if products is not None:
+            for product in products:
+                self.add_product(product)
+
+    def add_product(self, product) -> None:
+        """
+        Добавляет продукт в категорию
+
+        Args:
+            product: Продукт для добавления
+
+        Raises:
+            ZeroQuantityError: Если количество товара равно 0
+            TypeError: Если объект не является продуктом
+        """
+        try:
+            print(f"Попытка добавления товара: {getattr(product, 'name', 'Неизвестный товар')}")
+
+            # Проверяем, что продукт имеет необходимые атрибуты
+            if (hasattr(product, "name") and hasattr(product, 'price') and
+                    hasattr(product, 'quantity') and hasattr(product, 'get_description')):
+
+                # Проверяем количество товара
+                if product.quantity == 0:
+                    raise ZeroQuantityError(f"Товар '{product.name}' не может быть добавлен с нулевым количеством")
+
+                self.__products.append(product)
+                Category.total_unique_products = len(self.get_products())
+                print(f"Товар '{product.name}' успешно добавлен в категорию '{self.name}'")
+
+            else:
+                raise TypeError("Можно добавлять только объекты, которые являются продуктами")
+
+        except (ZeroQuantityError, TypeError) as e:
+            print(f"Ошибка при добавлении товара: {e}")
+            raise
+        finally:
+            print("Обработка добавления товара завершена\n")
+
+    def get_products(self) -> list:
+        """Возвращает список продуктов в категории"""
+        return self.__products
+
+    @property
+    def products(self) -> list:
+        """Свойство для доступа к списку продуктов"""
+        return self.__products
+
+    def calculate_average_price(self) -> float:
+        """
+        Подсчитывает средний ценник всех товаров в категории.
+        Возвращает 0, если в категории нет товаров.
+        """
+        try:
+            total_price = sum(product.price for product in self.__products)
+            average = total_price / len(self.__products)
+            return average
+        except ZeroDivisionError:
+            return 0
+
+    def __str__(self) -> str:
+        """Строковое представление категории"""
+        products_info = []
+        for product in self.__products:
+            product_str = str(product)
+            products_info.append(product_str)
+
+        products_str = "\n".join(products_info)
+        return f"Категория: {self.name}\nОписание: {self.description}\nПродукты:\n{products_str}"
+
+    def __len__(self) -> int:
+        """Возвращает количество продуктов в категории"""
+        return len(self.__products)
+
+
+class Order:
+    """Класс для заказов"""
+
+    def __init__(self):
+        self.__products = []
+
+    def add_product(self, product) -> None:
+        """
+        Добавляет продукт в заказ
+
+        Args:
+            product: Продукт для добавления
+
+        Raises:
+            ZeroQuantityError: Если количество товара равно 0
+        """
+        try:
+            print(f"Попытка добавления товара в заказ: {getattr(product, 'name', 'Неизвестный товар')}")
+
+            # Проверяем количество товара
+            if hasattr(product, 'quantity') and product.quantity == 0:
+                raise ZeroQuantityError(f"Товар '{product.name}' не может быть добавлен в заказ с нулевым количеством")
+
+            self.__products.append(product)
+            print(f"Товар '{product.name}' успешно добавлен в заказ")
+
+        except ZeroQuantityError as e:
+            print(f"Ошибка при добавлении товара в заказ: {e}")
+            raise
+        finally:
+            print("Обработка добавления товара в заказ завершена\n")
+
+    def get_products(self) -> list:
+        """Возвращает список продуктов в заказе"""
+        return self.__products
+
+
+# Примеры использования с обработкой исключений
+if __name__ == "__main__":
+    print("=== Тестирование исключений для товаров с нулевым количеством ===\n")
+
+    # Тестирование создания товара с нулевым количеством
+    try:
+        print("1. Попытка создать товар с нулевым количеством:")
+        bad_product = Product("Недоступный товар", 100, 0)
+    except ValueError as e:
+        print(f"   Ошибка: {e}\n")
+
+    # Создание нормальных товаров
+    try:
+        print("2. Создание нормальных товаров:")
+        product1 = Product("Телефон", 500, 10)
+        product2 = Product("Ноутбук", 1000, 5)
+        print("   Товары успешно созданы\n")
+    except ValueError as e:
+        print(f"   Ошибка: {e}\n")
+
+    # Создание категории и добавление товаров
+    try:
+        print("3. Создание категории и добавление товаров:")
+        electronics = Category("Электроника", "Техника и гаджеты")
+        electronics.add_product(product1)
+        electronics.add_product(product2)
+        print(f"   Средняя цена в категории: {electronics.calculate_average_price():.2f} руб.\n")
+    except (ValueError, ZeroQuantityError) as e:
+        print(f"   Ошибка: {e}\n")
+
+    # Работа с заказом
+    try:
+        print("4. Работа с заказом:")
+        order = Order()
+        order.add_product(product1)
+        print("   Заказ успешно создан\n")
+    except ZeroQuantityError as e:
+        print(f"   Ошибка: {e}\n")
+
+    # Тестирование наследованных классов
+    try:
+        print("5. Тестирование наследованных классов:")
+        smartphone = Smartphone("iPhone", 999, 0, "15 Pro", 256, "Black")
+    except ValueError as e:
+        print(f"   Ошибка при создании смартфона: {e}\n")
+
+    try:
+        lawn_grass = LawnGrass("Газонная трава", 50, 0, "Германия", "14 дней", "Зеленая")
+    except ValueError as e:
+        print(f"   Ошибка при создании газонной травы: {e}\n")
