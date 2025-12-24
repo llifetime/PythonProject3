@@ -1,50 +1,72 @@
 class Product:
-    def __init__(self, name, description, price, quantity):
-        """
-        Конструктор класса Product
-        """
-        self.name = name
-        self.__price = price  # ПРИВАТНАЯ цена
-        self.quantity = quantity
-        self.description = description
+    """Базовый класс для товаров"""
 
-    # Геттер для цены
+    def __init__(self, name, description, price, quantity):
+        self.name = name
+        self.description = description
+        self.__price = price
+        self.quantity = quantity
+
     @property
     def price(self):
-        """Возвращает текущую цену товара"""
+        """Геттер для цены"""
         return self.__price
 
-    # Сеттер для цены с проверкой
     @price.setter
-    def price(self, new_price):
-        """Устанавливает новую цену с проверкой"""
-        if new_price <= 0:
-            print("Цена не должна быть нулевая или отрицательная")
+    def price(self, value):
+        """Сеттер для цены с проверкой"""
+        if value <= 0:
+            print("Цена не должна быть нулевой или отрицательной")
         else:
-            self.__price = new_price
+            self.__price = value
 
     def __str__(self):
-        """Строковое представление товара"""
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
-    def __add__(self, other):
-        """Сложение двух продуктов возвращает общую стоимость"""
-        if isinstance(other, Product):
-            # Product + Product = сумма стоимостей обоих продуктов
-            return (self.price * self.quantity) + (other.price * other.quantity)
-        elif isinstance(other, (int, float)):
-            # Product + число = стоимость продукта + число
-            return (self.price * self.quantity) + other
-        else:
-            raise TypeError("Можно складывать только с Product или числами")
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.name}, {self.description}, {self.price}, {self.quantity})"
 
-    def __radd__(self, other):
-        """Правое сложение - число + Product"""
-        if isinstance(other, (int, float)):
-            # число + Product = число + стоимость продукта
-            return other + (self.price * self.quantity)
-        else:
-            raise TypeError("Можно складывать только с числами")
+    def __add__(self, other):
+        """Метод для сложения товаров (общая стоимость)"""
+        if type(self) is not type(other):
+            raise TypeError("Нельзя складывать товары разных типов")
+        return (self.price * self.quantity) + (other.price * other.quantity)
+
+
+class Smartphone(Product):
+    """Класс для смартфонов"""
+
+    def __init__(self, name, description, price, quantity, efficiency, model, memory, color):
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+    def __str__(self):
+        return f"Смартфон {self.name} ({self.model}), {self.color}, {self.memory}GB, {self.price} руб."
 
     def __repr__(self):
-        return f"Product('{self.name}', {self.price}, {self.quantity})"
+        return (
+            f"Smartphone({self.name}, {self.description}, {self.price}, "
+            f"{self.quantity}, {self.efficiency}, {self.model}, {self.memory}, {self.color})"
+        )
+
+
+class LawnGrass(Product):
+    """Класс для газонной травы"""
+
+    def __init__(self, name, description, price, quantity, country, germination_period, color):
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
+    def __str__(self):
+        return f"Газонная трава {self.name}, {self.color}, {self.country}, {self.price} руб."
+
+    def __repr__(self):
+        return (
+            f"LawnGrass({self.name}, {self.description}, {self.price}, "
+            f"{self.quantity}, {self.country}, {self.germination_period}, {self.color})"
+        )
