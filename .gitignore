@@ -1,0 +1,8 @@
+gitignore
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+*.lcov
